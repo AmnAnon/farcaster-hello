@@ -2,71 +2,73 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchCoinGeckoPrice } from "@/lib/api";
-import ChartsSection from "@/components/ChartsSection";
+import { 
+  LayoutDashboard, 
+  CandlestickChart, 
+  Fish, 
+  ShieldAlert, 
+  BarChart3 
+} from 'lucide-react';
 import OverviewSection from "@/components/sections/OverviewSection";
 import MarketSection from "@/components/sections/MarketSection";
 import WhalesSection from "@/components/sections/WhalesSection";
 import RiskSection from "@/components/sections/RiskSection";
+import ChartsSection from "@/components/ChartsSection";
 
-interface PriceData{
-   [key:string]:{
-    usd:number;
-    usd_24h_change:number;
-  };
+interface ProtocolData {
+  slug: string;
+  displayName: string;
+  tvl: number;
+  fees24h: number;
+  totalSupply: number;
+  totalBorrow: number;
 }
 
 export default function Home() {
   const [tab, setTab] = useState("overview");
- const [assetPrices, setAssetPrices] = useState<PriceData | null>(null);
-
-  const [markets, setMarkets] = useState<Market[]>([]);
+  const [protocolData, setProtocolData] = useState<ProtocolData | null>(null);
+  const [stablecoinPrice, setStablecoinPrice] = useState(null); 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadAllData() {
+    async function loadData() {
       setIsLoading(true);
+      setError(null);
       try {
-        const marketResponse = await fetch('/api/seamless-data');
-        const marketData = await marketResponse.json();
-        setMarkets(marketData);
-
-        const priceData = await fetchCoinGeckoPrice(['aave', 'weth', 'usd-coin']);
-        setAssetPrices(priceData);
-
+        const response = await fetch('/api/protocols');
+        if (!response.ok) {
+          throw new Error('Failed to fetch protocol overview data');
+        }
+        const [protocolRes, priceRes] = await Promise.all([
+        fetch('/api/protocols'),
+        fetchCoinGeckoPrice(['usd-coin'])
+      ]);
+      
+      const protocol = await protocolRes.json();
+      setProtocolData(protocol);
+      setStablecoinPrice(priceRes);
       } catch (err: any) {
         setError(err.message);
       } finally {
         setIsLoading(false);
       }
     }
-    loadAllData();
+    loadData();
   }, []);
 
-const protocolTotals = markets.reduce(
-    (acc, market) => {
-      acc.totalSupply += parseFloat(market.totalDepositBalanceUSD);
-      acc.totalBorrow += parseFloat(market.totalBorrowBalanceUSD);
-      return acc;
-    },
-    { totalSupply: 0, totalBorrow: 0 } // Initial values
-  );
-
   const renderSection = () => {
-    switch (tab) {
+      switch (tab) {
       case "market":
         return <MarketSection />;
       case "whales":
         return <WhalesSection />;
       case "risk":
-        return <RiskSection />;
+        return <RiskSection data={protocolData} stablecoinPrice={stablecoinPrice} isLoading={isLoading} />;
       case "charts":
-        return <ChartsSection 
-         assetPrices={assetPrices} isLoading={isLoading} />;
+        return <ChartsSection />; 
       default:
-        return <OverviewSection 
-         totals={protocolTotals} isLoading={isLoading} />;
+        return <OverviewSection data={protocolData} isLoading={isLoading} />;
     }
   };
 
@@ -78,17 +80,16 @@ const protocolTotals = markets.reduce(
         </h1>
         <p className="text-gray-400 mb-6">Real-time DeFi analytics on Base</p>
         
-        {/* The currently active section is rendered here */}
         {renderSection()}
       </div>
 
-      {/* Bottom Nav */}
+      {/* Bottom Nav with Icons */}
       <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm border-t border-gray-800 flex justify-around py-3">
-        <button onClick={() => setTab("overview")} className={`${tab === "overview" ? "text-purple-400" : "text-gray-400"}`}>📊 Overview</button>
-        <button onClick={() => setTab("market")} className={`${tab === "market" ? "text-purple-400" : "text-gray-400"}`}>📈 Market</button>
-        <button onClick={() => setTab("whales")} className={`${tab === "whales" ? "text-purple-400" : "text-gray-400"}`}>🐋 Whales</button>
-        <button onClick={() => setTab("risk")} className={`${tab === "risk" ? "text-purple-400" : "text-gray-400"}`}>⚠ Risk</button>
-        <button onClick={() => setTab("charts")} className={`${tab === "charts" ? "text-purple-400" : "text-gray-400"}`}>📉 Charts</button>
+        <button onClick={() => setTab("overview")} className={`${tab === "overview" ? "text-purple-400" : "text-gray-400"}`}><LayoutDashboard size={24} /></button>
+        <button onClick={() => setTab("market")} className={`${tab === "market" ? "text-purple-400" : "text-gray-400"}`}><CandlestickChart size={24} /></button>
+        <button onClick={() => setTab("whales")} className={`${tab === "whales" ? "text-purple-400" : "text-gray-400"}`}><Fish size={24} /></button>
+        <button onClick={() => setTab("risk")} className={`${tab === "risk" ? "text-purple-400" : "text-gray-400"}`}><ShieldAlert size={24} /></button>
+        <button onClick={() => setTab("charts")} className={`${tab === "charts" ? "text-purple-400" : "text-gray-400"}`}><BarChart3 size={24} /></button>
       </div>
     </div>
   );

@@ -1,9 +1,8 @@
 // src/components/sections/OverviewSection.tsx
-
 import StatCard from "@/components/ui/StatCard";
 
-const formatCurrency = (value: number | undefined) => {
-  if (value === undefined || value === null) return 'N/A';
+const formatCurrency = (value: number) => {
+  if (!value) return '$0'; // Handle case where value might be null or undefined
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -41,4 +40,3 @@ export default function OverviewSection({ data, isLoading }: any) {
     </div>
   );
 }
-

@@ -1,3 +1,5 @@
+// src/lib/api.ts
+
 export async function fetchProtocolOnBase(protocolSlug: string) {
   try {
     const response = await fetch(`https://api.llama.fi/protocol/${protocolSlug}`);
@@ -7,21 +9,19 @@ export async function fetchProtocolOnBase(protocolSlug: string) {
     const data = await response.json();
 
     const baseTvl = data.chainTvls.Base?.tvl;
-    
-    if (baseTvl === undefined) {
-      return { name: data.name, tvl: 0 };
-    }
+    const baseChainData = data.chains?.includes("Base") ? data.chainTvls.Base : {};
 
-    return { name: data.name, tvl: baseTvl };
+    return {
+      name: data.name,
+      tvl: baseTvl || 0,
+      fees24h: baseChainData.dailyFees || 0,
+      totalSupply: baseChainData.totalSupplyUsd || 0,
+      totalBorrow: baseChainData.totalBorrowUsd || 0,
+    };
 
   } catch (error) {
     console.error(`Failed to fetch data for ${protocolSlug}:`, error);
-    return { name: protocolSlug, tvl: 0, error: true };
+    return { error: true };
   }
-}
-
-// Other API functions can remain here for future use
-export async function fetchCoinGeckoPrice(ids: string[]) {
-  // ...
 }
 
