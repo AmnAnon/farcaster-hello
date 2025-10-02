@@ -1,4 +1,3 @@
-// src/app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
 
@@ -6,14 +5,14 @@ export const metadata: Metadata = {
   title: "Hello Farcaster Mini App",
   description: "A simple demo frame + webpage",
   openGraph: {
-    images: ["https://yourdomain.vercel.app/preview.png"], // update with real image
+    images: ["https://domain.vercel.app/preview.png"], 
   },
   other: {
     "fc:frame": "vNext",
-    "fc:frame:image": "https://yourdomain.vercel.app/preview.png", // preview in Warpcast
+    "fc:frame:image": "https://domain.vercel.app/preview.png", 
     "fc:frame:button:1": "Say Hello",
     "fc:frame:button:2": "Visit Site",
-    "fc:frame:post_url": "https://yourdomain.vercel.app/api/frame", // API handler
+    "fc:frame:post_url": "https://domain.vercel.app/api/frame",
   },
 };
 

@@ -1,8 +1,4 @@
-// src/app/api/protocols/route.ts
-
 import { NextResponse } from 'next/server';
-
-// This is the function from your lib/api.ts file
 import { fetchProtocolOnBase } from '@/lib/api'; 
 
 const protocols = [
@@ -13,7 +9,6 @@ const protocols = [
 
 export async function GET() {
   try {
-    // We use Promise.all to fetch data for all protocols in parallel from the server
     const data = await Promise.all(
       protocols.map(async (p) => {
         const protocolData = await fetchProtocolOnBase(p.slug);
@@ -25,7 +20,6 @@ export async function GET() {
       })
     );
 
-    // Return the combined data
     return NextResponse.json(data);
 
   } catch (error) {
@@ -34,5 +28,4 @@ export async function GET() {
   }
 }
 
-// This is the key! Vercel will cache the response for 10 minutes (600 seconds).
 export const revalidate = 600;

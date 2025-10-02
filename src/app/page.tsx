@@ -1,91 +1,112 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Card, Text, Metric } from "@tremor/react"; // Import Tremor components
 
-// Assuming your api lib and fetch functions are set up
-// import { fetchProtocolOnBase } from "@/lib/api"; 
-
-interface Protocol {
-  slug: string;
-  displayName: string;
-  tvl: number;
-  error?: boolean;
+// Section components
+function OverviewSection() {
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold">Protocol Analytics</h2>
+      <div className="grid grid-cols-1 gap-4">
+        <Card title="Daily Inflow" value="1,250,000" gradient="from-green-400 to-emerald-600" />
+        <Card title="Daily Outflow" value="980,000" gradient="from-pink-400 to-red-500" />
+        <Card title="Total Supply" value="5,400,000" gradient="from-blue-400 to-indigo-500" />
+        <Card title="Total Borrow" value="2,200,000" gradient="from-orange-400 to-yellow-500" />
+      </div>
+    </div>
+  );
 }
 
-export default function Dashboard() {
-  const [protocols, setProtocols] = useState<Protocol[]>([]);
-  const [current, setCurrent] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+function MarketSection() {
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Market Intelligence</h2>
+      <p className="text-gray-400">Charts for asset prices, yields & supply/borrow spreads will go here.</p>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    async function loadData() {
-      const response = await fetch('/api/protocols');
-      const data = await response.json();
-      setProtocols(data);
-      setIsLoading(false);
+function WhalesSection() {
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Whales & Smart Money</h2>
+      <p className="text-gray-400">Tracking top wallets, large inflows, and governance signals.</p>
+    </div>
+  );
+}
+
+function RiskSection() {
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Risk Metrics</h2>
+      <div className="grid grid-cols-1 gap-4">
+        <Card title="Utilization Rate" value="45%" gradient="from-blue-400 to-sky-500" />
+        <Card title="Liquidation Risk" value="Low" gradient="from-red-400 to-pink-500" />
+        <Card title="Peg Deviations" value="Stable" gradient="from-yellow-400 to-orange-500" />
+        <Card title="Audit Status" value="Audited ✅" gradient="from-green-400 to-emerald-500" />
+      </div>
+    </div>
+  );
+}
+
+function ChartsSection() {
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Performance Charts</h2>
+      <p className="text-gray-400">Line charts & visualizations for inflows, TVL, utilization, etc.</p>
+    </div>
+  );
+}
+
+// Reusable card
+function Card({ title, value, gradient }: { title: string; value: string; gradient: string }) {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.03 }}
+      className={`p-5 rounded-2xl shadow-lg bg-gradient-to-r ${gradient}`}
+    >
+      <p className="text-sm font-medium text-white">{title}</p>
+      <p className="text-2xl font-bold text-white">{value}</p>
+    </motion.div>
+  );
+}
+
+export default function Home() {
+  const [tab, setTab] = useState("overview");
+
+  const renderSection = () => {
+    switch (tab) {
+      case "market":
+        return <MarketSection />;
+      case "whales":
+        return <WhalesSection />;
+      case "risk":
+        return <RiskSection />;
+      case "charts":
+        return <ChartsSection />;
+      default:
+        return <OverviewSection />;
     }
-    loadData();
-  }, []);
-
-  const nextSlide = () => setCurrent((c) => (c + 1) % protocols.length);
-  const prevSlide = () => setCurrent((c) => (c - 1 + protocols.length) % protocols.length);
-  
-  const currentProtocol = protocols[current];
-
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      notation: 'compact',
-      maximumFractionDigits: 2,
-    }).format(num);
   };
 
-  if (isLoading) {
-    // A simple loading state for the whole dashboard
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white">
-            <div className="w-[400px] h-[220px]">
-                <Card className="bg-gray-800 p-6 w-full h-full rounded-2xl shadow-xl flex items-center justify-center">
-                    <Text className="text-gray-400">Loading Dashboard...</Text>
-                </Card>
-            </div>
-        </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white p-4">
-      <div className="w-[400px] h-[220px] flex items-center justify-center">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -50 }}
-          transition={{ duration: 0.3 }}
-          className="w-full h-full"
-        >
-          {/* We are now using Tremor's components for a dashboard-like feel */}
-          <Card 
-            className="w-full h-full !bg-gray-800" // Use ! to override default Tremor background
-            decoration="top" 
-            decorationColor="indigo"
-          >
-            <Text className="text-gray-400">{currentProtocol.displayName}</Text>
-            {currentProtocol.error ? (
-                <Metric className="text-red-500">Error</Metric>
-            ) : (
-                <Metric className="text-white">{formatNumber(currentProtocol.tvl)}</Metric>
-            )}
-            <Text className="mt-4 text-gray-500">TVL on Base</Text>
-          </Card>
-        </motion.div>
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white pb-20">
+      <div className="p-6">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 text-transparent bg-clip-text">
+          Seamless Protocol Dashboard
+        </h1>
+        <p className="text-gray-400 mb-6">Real-time DeFi analytics on Base</p>
+        {renderSection()}
       </div>
 
-      <div className="mt-6 flex gap-4">
-        <button onClick={prevSlide} className="px-5 py-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">◀</button>
-        <button onClick={nextSlide} className="px-5 py-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">▶</button>
+      {/* Bottom Nav */}
+      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around py-3">
+        <button onClick={() => setTab("overview")} className={`${tab === "overview" ? "text-purple-400" : "text-gray-400"}`}>📊 Overview</button>
+        <button onClick={() => setTab("market")} className={`${tab === "market" ? "text-purple-400" : "text-gray-400"}`}>📈 Market</button>
+        <button onClick={() => setTab("whales")} className={`${tab === "whales" ? "text-purple-400" : "text-gray-400"}`}>🐋 Whales</button>
+        <button onClick={() => setTab("risk")} className={`${tab === "risk" ? "text-purple-400" : "text-gray-400"}`}>⚠ Risk</button>
+        <button onClick={() => setTab("charts")} className={`${tab === "charts" ? "text-purple-400" : "text-gray-400"}`}>📉 Charts</button>
       </div>
     </div>
   );

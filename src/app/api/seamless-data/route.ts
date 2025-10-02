@@ -23,7 +23,7 @@ interface Market {
   name: string;
   totalValueLockedUSD: string;
   totalBorrowBalanceUSD: string;
-  totalDepositBalanceUSD: string; // Changed from totalSupplyBalanceUSD
+  totalDepositBalanceUSD: string;
   inputToken: {
     symbol: string;
   };
@@ -55,4 +55,4 @@ export async function GET() {
   }
 }
 
-export const revalidate = 60; // Cache for 60 seconds
+export const revalidate = 60;
