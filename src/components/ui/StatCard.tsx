@@ -18,4 +18,3 @@ export default function StatCard({ title, value, isLoading }: StatCardProps) {
     </div>
   );
 }
-
